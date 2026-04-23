@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date
-import os
+import io
 
 st.set_page_config(layout="wide")
 st.title("💧 Water Treatment Plant Logbook (E-Form)")
@@ -98,7 +98,7 @@ paras_air = st.number_input("📏 Paras Air")
 
 st.divider()
 
-# ===== SAVE =====
+# ===== SAVE BUTTON =====
 if st.button("💾 Save Data"):
 
     data = {
@@ -147,13 +147,16 @@ if st.button("💾 Save Data"):
 
     df = pd.DataFrame([data])
 
-    os.makedirs("dataset", exist_ok=True)
-    file_path = "dataset/wtp_eform.xlsx"
+    # Convert to Excel (NO FILE SAVING)
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False, engine='openpyxl')
 
-    if os.path.exists(file_path):
-        existing = pd.read_excel(file_path)
-        df = pd.concat([existing, df], ignore_index=True)
+    st.success("✅ Data ready!")
 
-    df.to_excel(file_path, index=False)
-
-    st.success("✅ Data saved to Excel!")
+    st.download_button(
+        label="⬇️ Download Excel",
+        data=buffer,
+        file_name="WTP_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    
